@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.codingcure.userService.dto.Fund;
@@ -23,8 +24,14 @@ public class UserService {
 	@Autowired
 	UserRepo userRepo;
 	
+//	@Autowired
+//	WebClient webClient;
+	
 	@Autowired
-	WebClient webClient;
+	RestTemplate restTemplate;
+	
+	@Autowired
+	ObjectMapper objectMapper;
 	
 
 	public User saveUserInfo(User user) {
@@ -46,7 +53,7 @@ public class UserService {
 		
 	}
 
-	public User createAccount(String userId, Investment investment) throws JsonMappingException, JsonProcessingException {
+	public User createInvestment(String userId, Investment investment) throws JsonMappingException, JsonProcessingException {
 		User presentUser = null;
 		List<Investment> listofInvestments = new ArrayList<>();
 		listofInvestments.add(investment);
@@ -54,11 +61,15 @@ public class UserService {
 		if (user.isPresent()) {
 			
 			//call fund service API
-			Fund fundInfo = webClient.get()
-					.uri("http://fund-service/fund/getFundById/"+investment.getFundId())
-					.retrieve()
-					.bodyToMono(Fund.class)
-					.block();
+//			Fund fundInfo = webClient.get()
+//					.uri("http://localhost:9091/fund/getFundById/"+investment.getFundId())
+//					.retrieve()
+//					.bodyToMono(Fund.class)
+//					.block();
+			String url = "http://FUND-SERVICE/fund/getFundById/"+investment.getFundId();
+			String response = restTemplate.getForObject(url, String.class);
+			Fund fundInfo = objectMapper.readValue(response, Fund.class);
+			
 			double unitOfPurchased = investment.getAmount()/fundInfo.getNav();
 			investment.setUnitsOfPurchased(unitOfPurchased);
 			investment.setCurrentInvestmentValue(unitOfPurchased*fundInfo.getNav());

@@ -47,7 +47,7 @@ public class UserController {
 	
 	@PostMapping("/createInvestment/{userId}")
 	public ResponseEntity<User> createInvestment(@PathVariable String userId, @RequestBody Investment investment) throws JsonMappingException, JsonProcessingException {
-		User user = userService.createAccount(userId, investment);
+		User user = userService.createInvestment(userId, investment);
 		 return new ResponseEntity<>(user, HttpStatus.OK);
 	}
 
